@@ -33,6 +33,14 @@ public class JwtUserDetailsService implements UserDetailsService {
 				new ArrayList<>());
 	}
 
+	
+	public Users updatePassword(String username, String password) {
+		Users user = userRepository.findByUsername(username);
+		user.setPassword(password);
+		return userRepository.save(user);
+	}
+	
+	
 	public Users save(Users newUser) {
 		Users user = new Users();
 		user.setUsername(newUser.getUsername());
@@ -40,6 +48,7 @@ public class JwtUserDetailsService implements UserDetailsService {
 		return userRepository.save(user);
 	}
 
+	
 	public Users getUser() {
 		return user;
 	}

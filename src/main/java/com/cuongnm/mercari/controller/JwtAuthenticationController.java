@@ -54,13 +54,29 @@ public class JwtAuthenticationController {
 		return null;
 	}
 	
-	
 
 	
 	@RequestMapping(value = "/register", method = RequestMethod.POST)
 	public ResponseEntity<?> saveUser(@RequestBody Users user) throws Exception {
 		return ResponseEntity.ok(userDetailsService.save(user));
 	}
+
+
+	
+	@RequestMapping(value = "/reset", method = RequestMethod.POST)
+	public ResponseEntity<?> resetPassword(@RequestBody JwtRequest resetRequest) throws Exception {
+		userDetailsService.updatePassword(resetRequest.getUsername(), resetRequest.getPassword());
+		authenticate(resetRequest.getUsername(), resetRequest.getPassword());
+		final UserDetails userDetails = userDetailsService.loadUserByUsername(resetRequest.getUsername());
+
+		final String token = jwtTokenUtil.generateToken(userDetails);
+		Users user = userDetailsService.getUser();
+		return ResponseEntity.ok(new JwtResponse(token, user.getUserId().toString(), user.getUsername(), (user.getAvatar() == null && (user.getStatus() == null || user.getStatus() == 1 || user.getStatus() == 0) ? "-1":"1" )));
+		
+	}
+	
+	
+	
 
 	private void authenticate(String username, String password) throws Exception {
 		try {
@@ -71,4 +87,6 @@ public class JwtAuthenticationController {
 			throw new Exception("INVALID_CREDENTIALS", e);
 		}
 	}
+	
+	
 }
