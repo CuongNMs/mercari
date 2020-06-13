@@ -18,6 +18,7 @@ public class JwtUserDetailsService implements UserDetailsService {
 	@Autowired
 	private UserRepository userRepository;
 
+	
 	@Autowired
 	private PasswordEncoder bcryptEncoder;
 	
@@ -32,7 +33,7 @@ public class JwtUserDetailsService implements UserDetailsService {
 		return new org.springframework.security.core.userdetails.User(this.user.getUsername(), this.user.getPassword(),
 				new ArrayList<>());
 	}
-
+	
 	
 	public Users updatePassword(String username, String password) {
 		Users user = userRepository.findByUsername(username);

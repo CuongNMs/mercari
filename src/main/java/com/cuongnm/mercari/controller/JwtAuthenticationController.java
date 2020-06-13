@@ -68,14 +68,10 @@ public class JwtAuthenticationController {
 		userDetailsService.updatePassword(resetRequest.getUsername(), resetRequest.getPassword());
 		authenticate(resetRequest.getUsername(), resetRequest.getPassword());
 		final UserDetails userDetails = userDetailsService.loadUserByUsername(resetRequest.getUsername());
-
 		final String token = jwtTokenUtil.generateToken(userDetails);
 		Users user = userDetailsService.getUser();
 		return ResponseEntity.ok(new JwtResponse(token, user.getUserId().toString(), user.getUsername(), (user.getAvatar() == null && (user.getStatus() == null || user.getStatus() == 1 || user.getStatus() == 0) ? "-1":"1" )));
-		
 	}
-	
-	
 	
 
 	private void authenticate(String username, String password) throws Exception {

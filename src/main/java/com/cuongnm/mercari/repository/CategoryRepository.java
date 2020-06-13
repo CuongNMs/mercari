@@ -12,7 +12,6 @@ import com.cuongnm.mercari.model.Categories;
 @Repository
 public interface CategoryRepository extends JpaRepository<Categories, Long>{
 
-	// List<Categories> findAll(Long categoryId);
 	
 	@Query(value = "WITH RECURSIVE rcte as " + 
 			"(SELECT category_id, category_name, parent_category_id FROM categories WHERE category_id = ?1 " + 
