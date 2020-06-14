@@ -75,6 +75,15 @@ public class Users {
 	}
 
 	
+	
+	
+	public Users(Long userId, String username, byte[] avatar) {
+		this.userId = userId;
+		this.username = username;
+		this.avatar = avatar;
+	}
+
+
 	public Long getUserId() {
 		return userId;
 	}

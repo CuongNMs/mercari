@@ -9,6 +9,7 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import com.cuongnm.mercari.config.JwtTokenUtil;
 import com.cuongnm.mercari.model.Users;
 import com.cuongnm.mercari.repository.UserRepository;
 
@@ -18,20 +19,30 @@ public class JwtUserDetailsService implements UserDetailsService {
 	@Autowired
 	private UserRepository userRepository;
 
+	@Autowired
+	private JwtTokenUtil jtUtil;
+	
 	
 	@Autowired
 	private PasswordEncoder bcryptEncoder;
 	
-	private Users user;
-	
 	@Override
 	public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-		 this.user = userRepository.findByUsername(username);
+		 Users user = userRepository.findByUsername(username);
 		if (user == null) {
 			throw new UsernameNotFoundException(username);
 		}
-		return new org.springframework.security.core.userdetails.User(this.user.getUsername(), this.user.getPassword(),
+		return new org.springframework.security.core.userdetails.User(user.getUsername(), user.getPassword(),
 				new ArrayList<>());
+	}
+	
+	public String getUsernameFromToken(String token) {
+		return jtUtil.getUsernameFromToken(token);
+	}
+	
+	
+	public Users getUserByUsername(String username) {
+		return userRepository.findByUsername(username);
 	}
 	
 	
@@ -47,15 +58,6 @@ public class JwtUserDetailsService implements UserDetailsService {
 		user.setUsername(newUser.getUsername());
 		user.setPassword(bcryptEncoder.encode(newUser.getPassword()));
 		return userRepository.save(user);
-	}
-
-	
-	public Users getUser() {
-		return user;
-	}
-
-	public void setUser(Users user) {
-		this.user = user;
 	}
 
 }
