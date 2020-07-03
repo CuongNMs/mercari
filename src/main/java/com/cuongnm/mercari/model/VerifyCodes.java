@@ -4,31 +4,40 @@ import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.OneToOne;
 import javax.persistence.Table;
 
 @Entity
-@Table(name = "verify_codes", schema = "public")
+@Table(name = "verify_codes")
 public class VerifyCodes {
 	@Id
 	@GeneratedValue
-	@Column(name = "verify_code_id", unique = true, nullable = false)
+	@Column(name = "verify_code_id")
 	private Long verifyCodeId;
-	
-	@Column(name = "verify_code", unique = false, nullable = true)
-    private String verifyCode;
-	
-	@Column(name = "username", unique = true, nullable = false)
-    private String username;
+
+	@Column(name = "verify_code")
+	private String verifyCode;
+
+	@OneToOne
+	@JoinColumn(name = "user_id")
+	private Users users;
 
 	public VerifyCodes() {
 
 	}
-	
-	public VerifyCodes(String verifyCode, String username) {
-		this.verifyCode = verifyCode;
-		this.username = username;
+
+	public Users getUsers() {
+		return users;
 	}
 
+	public void setUsers(Users users) {
+		this.users = users;
+	}
+
+	public VerifyCodes(String verifyCode) {
+		this.verifyCode = verifyCode;
+	}
 
 	public Long getVerifyCodeId() {
 		return verifyCodeId;
@@ -46,14 +55,4 @@ public class VerifyCodes {
 		this.verifyCode = verifyCode;
 	}
 
-	public String getUsername() {
-		return username;
-	}
-
-	public void setUsername(String username) {
-		this.username = username;
-	}
-	
-	
-	
 }

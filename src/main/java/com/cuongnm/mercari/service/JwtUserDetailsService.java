@@ -10,7 +10,9 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import com.cuongnm.mercari.config.JwtTokenUtil;
+import com.cuongnm.mercari.model.JwtBlacklist;
 import com.cuongnm.mercari.model.Users;
+import com.cuongnm.mercari.repository.JwtBlacklistRepository;
 import com.cuongnm.mercari.repository.UserRepository;
 
 @Service
@@ -22,6 +24,8 @@ public class JwtUserDetailsService implements UserDetailsService {
 	@Autowired
 	private JwtTokenUtil jtUtil;
 	
+	@Autowired
+    public JwtBlacklistRepository jwtBlacklistRepository;
 	
 	@Autowired
 	private PasswordEncoder bcryptEncoder;
@@ -45,6 +49,14 @@ public class JwtUserDetailsService implements UserDetailsService {
 		return userRepository.findByUsername(username);
 	}
 	
+	
+	public JwtBlacklist getJwtBlacklistToken(String token) {
+		return jwtBlacklistRepository.findByTokenEquals(token);
+	}
+	
+	public JwtBlacklist saveJwtBlacklistToken(JwtBlacklist jwtBlacklist) {
+		return jwtBlacklistRepository.save(jwtBlacklist);
+	}
 	
 	public Users updatePassword(String username, String password) {
 		Users user = userRepository.findByUsername(username);

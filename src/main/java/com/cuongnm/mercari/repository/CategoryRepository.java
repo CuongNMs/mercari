@@ -22,4 +22,10 @@ public interface CategoryRepository extends JpaRepository<Categories, Long>{
 			"SELECT category_id, category_name, parent_category_id FROM rcte", nativeQuery = true)
 	List<Categories> findByCategoryId(Long categoryId);
 	
+	
 }
+
+
+
+
+

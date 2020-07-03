@@ -1,6 +1,7 @@
 package com.cuongnm.mercari.controller;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
@@ -14,9 +15,12 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.cuongnm.mercari.config.JwtTokenUtil;
+
 import com.cuongnm.mercari.model.Users;
+
 import com.cuongnm.mercari.service.JwtUserDetailsService;
-import com.cuongnm.mercari.utils.DefaultRequest;
+import com.cuongnm.mercari.utils.DefaultResponse;
+import com.cuongnm.mercari.utils.ExceptionResponse;
 import com.cuongnm.mercari.utils.JwtRequest;
 import com.cuongnm.mercari.utils.JwtResponse;
 
@@ -35,45 +39,38 @@ public class JwtAuthenticationController {
 
 	@RequestMapping(value = "/login", method = RequestMethod.POST)
 	public ResponseEntity<?> createAuthenticationToken(@RequestBody JwtRequest authenticationRequest) throws Exception {
-
-		authenticate(authenticationRequest.getUsername(), authenticationRequest.getPassword());
-
-		final UserDetails userDetails = userDetailsService.loadUserByUsername(authenticationRequest.getUsername());
-
-		final String token = jwtTokenUtil.generateToken(userDetails);
-		Users user = userDetailsService.getUserByUsername(authenticationRequest.getUsername());
-		
-		return ResponseEntity.ok(new JwtResponse(token, user.getUserId().toString(), user.getUsername(), (user.getAvatar() == null && (user.getStatus() == null || user.getStatus() == 1 || user.getStatus() == 0) ? "-1":"1" )));
+		try {
+			authenticate(authenticationRequest.getUsername(), authenticationRequest.getPassword());
+			final UserDetails userDetails = userDetailsService.loadUserByUsername(authenticationRequest.getUsername());
+			final String token = jwtTokenUtil.generateToken(userDetails);
+			Users user = userDetailsService.getUserByUsername(authenticationRequest.getUsername());
+			return ResponseEntity.ok(new DefaultResponse("1000", "OK", new JwtResponse(user.getUserId().toString(), user.getUsername(), token,
+					user.getAvatarPath() == null ? user.getAvatarPath() : "-1")));
+		} catch (Exception e) {
+			e.printStackTrace();
+			return new ResponseEntity<ExceptionResponse>(new ExceptionResponse("9995", "User is not validated"),
+					HttpStatus.BAD_REQUEST);
+		}
 	}
 
-	
-	
-	@RequestMapping(value = "/logout", method = RequestMethod.POST)
-	public ResponseEntity<?> logout(@RequestBody DefaultRequest logoutRequest) throws Exception {
-		// Todo code
-		return null;
-	}
-	
-
-	
-	@RequestMapping(value = "/register", method = RequestMethod.POST)
-	public ResponseEntity<?> saveUser(@RequestBody Users user) throws Exception {
-		return ResponseEntity.ok(userDetailsService.save(user));
-	}
-
-
-	
-	@RequestMapping(value = "/reset", method = RequestMethod.POST)
+	@RequestMapping(value = "/resetPassword", method = RequestMethod.POST)
 	public ResponseEntity<?> resetPassword(@RequestBody JwtRequest resetRequest) throws Exception {
-		userDetailsService.updatePassword(resetRequest.getUsername(), resetRequest.getPassword());
-		authenticate(resetRequest.getUsername(), resetRequest.getPassword());
-		final UserDetails userDetails = userDetailsService.loadUserByUsername(resetRequest.getUsername());
-		final String token = jwtTokenUtil.generateToken(userDetails);
-		Users user = userDetailsService.getUserByUsername(resetRequest.getUsername());
-		return ResponseEntity.ok(new JwtResponse(token, user.getUserId().toString(), user.getUsername(), (user.getAvatar() == null && (user.getStatus() == null || user.getStatus() == 1 || user.getStatus() == 0) ? "-1":"1" )));
+		try {
+			userDetailsService.updatePassword(resetRequest.getUsername(), resetRequest.getPassword());
+			authenticate(resetRequest.getUsername(), resetRequest.getPassword());
+			final UserDetails userDetails = userDetailsService.loadUserByUsername(resetRequest.getUsername());
+			final String token = jwtTokenUtil.generateToken(userDetails);
+			Users user = userDetailsService.getUserByUsername(resetRequest.getUsername());
+			return ResponseEntity.ok(new DefaultResponse("1000", "OK", new JwtResponse(user.getUserId().toString(), user.getUsername(), token,
+					user.getAvatarPath() == null ? user.getAvatarPath() : "-1")));
+		} catch (Exception e) {
+			e.printStackTrace();
+			return new ResponseEntity<ExceptionResponse>(new ExceptionResponse("9995", "User is not validated"),
+					HttpStatus.BAD_REQUEST);
+		}
+		
 	}
-	
-	
+
 	private void authenticate(String username, String password) throws Exception {
 		try {
 			authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(username, password));
@@ -83,6 +80,5 @@ public class JwtAuthenticationController {
 			throw new Exception("INVALID_CREDENTIALS", e);
 		}
 	}
-	
-	
+
 }

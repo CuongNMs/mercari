@@ -2,27 +2,24 @@ package com.cuongnm.mercari.utils;
 
 import java.io.Serializable;
 
-public class DefaultResponse implements Serializable {
+public class ExceptionResponse implements Serializable {
 
 	/**
 	 * 
 	 */
-	private static final long serialVersionUID = -3983374505077698189L;
-
+	private static final long serialVersionUID = 663675843507619135L;
 	private String code;
 	private String message;
-	private Object data;
 
-	public DefaultResponse() {
+	public ExceptionResponse() {
 		super();
 		// TODO Auto-generated constructor stub
 	}
 
-	public DefaultResponse(String code, String message, Object data) {
+	public ExceptionResponse(String code, String message) {
 		super();
 		this.code = code;
 		this.message = message;
-		this.data = data;
 	}
 
 	public String getCode() {
@@ -39,14 +36,6 @@ public class DefaultResponse implements Serializable {
 
 	public void setMessage(String message) {
 		this.message = message;
-	}
-
-	public Object getData() {
-		return data;
-	}
-
-	public void setData(Object data) {
-		this.data = data;
 	}
 
 }

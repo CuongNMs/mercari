@@ -4,31 +4,33 @@ import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 
 @Entity
-@Table(name = "followers", schema = "public")
+@Table(name = "followers")
 public class Followers {
-	
+
 	@Id
 	@GeneratedValue
-	@Column(name = "follow_id", unique = true, nullable = false)
+	@Column(name = "follow_id")
 	private Long followId;
 
-	@Column(name = "user_id", unique = true, nullable = false)
-	private Long userId;
-
-	@Column(name = "follow_user_id", unique = true, nullable = false)
+	@Column(name = "follow_user_id")
 	private Long followUserId;
+
+	@ManyToOne
+	@JoinColumn(name = "user_id") // thông qua khóa ngoại user_id
+	private Users users;
 
 	public Followers() {
 		super();
 		// TODO Auto-generated constructor stub
 	}
 
-	public Followers(Long userId, Long followUserId) {
+	public Followers(Long followUserId) {
 		super();
-		this.userId = userId;
 		this.followUserId = followUserId;
 	}
 
@@ -38,14 +40,6 @@ public class Followers {
 
 	public void setFollowId(Long followId) {
 		this.followId = followId;
-	}
-
-	public Long getUserId() {
-		return userId;
-	}
-
-	public void setUserId(Long userId) {
-		this.userId = userId;
 	}
 
 	public Long getFollowUserId() {
