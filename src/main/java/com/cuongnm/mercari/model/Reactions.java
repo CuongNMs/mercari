@@ -5,28 +5,34 @@ import java.util.Date;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
-import javax.persistence.PrePersist;
+
 import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
+
+import org.hibernate.annotations.GenericGenerator;
+
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 @Entity
 @Table(name = "reactions")
 public class Reactions {
 
 	@Id
-	@GeneratedValue
+	@GeneratedValue(strategy = GenerationType.AUTO, generator="native")
+	@GenericGenerator(
+		    name = "native",
+		    strategy = "increment"
+		)
 	@Column(name = "reaction_id")
 	private Long reactionId;
 
 	@Column(name = "reaction_type")
 	private Integer reactionType;
-
-	@Column(name = "target_user_id")
-	private Long targetUserId;
 
 	@Column(name = "subject")
 	private String subject;
@@ -48,17 +54,18 @@ public class Reactions {
 		return createdDate;
 	}
 
-	@PrePersist
 	public void setCreatedDate() {
 		this.createdDate = new Date();
 	}
 
 	@ManyToOne
 	@JoinColumn(name = "user_id") // thông qua khóa ngoại user_id
+	@JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
 	private Users users;
 	
 	@ManyToOne
 	@JoinColumn(name = "product_id") // thông qua khóa ngoại user_id
+	@JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
 	private Products products;
 
 	public Reactions() {
@@ -80,14 +87,6 @@ public class Reactions {
 
 	public void setReactionType(Integer reactionType) {
 		this.reactionType = reactionType;
-	}
-
-	public Long getTargetUserId() {
-		return targetUserId;
-	}
-
-	public void setTargetUserId(Long targetUserId) {
-		this.targetUserId = targetUserId;
 	}
 
 	public String getSubject() {

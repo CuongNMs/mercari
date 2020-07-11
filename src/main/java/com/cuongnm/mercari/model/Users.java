@@ -6,16 +6,22 @@ import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
+
+import org.hibernate.annotations.GenericGenerator;
+
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 @Entity
 @Table(name = "users")
 public class Users {
 
 	@Id
-	@GeneratedValue
+	@GeneratedValue(strategy = GenerationType.AUTO, generator = "native")
+	@GenericGenerator(name = "native", strategy = "increment")
 	@Column(name = "user_id")
 	private Long userId;
 
@@ -52,9 +58,6 @@ public class Users {
 	@Column(name = "city")
 	private String city;
 
-	@Column(name = "is_online")
-	private boolean isOnline;
-
 	@Column(name = "balance")
 	private Long balance;
 
@@ -67,25 +70,25 @@ public class Users {
 	@Column(name = "is_auto_withdraw")
 	private boolean isAutoWithdraw;
 
-	@OneToMany(mappedBy = "users", cascade = CascadeType.ALL) 
+	@OneToMany(mappedBy = "users", cascade = CascadeType.ALL)
+	@JsonIgnoreProperties({ "hibernateLazyInitializer", "handler" })
 	private Collection<Followers> followers;
-	
-	@OneToMany(mappedBy = "users", cascade = CascadeType.ALL) 
+
+	@OneToMany(mappedBy = "users", cascade = CascadeType.ALL)
+	@JsonIgnoreProperties({ "hibernateLazyInitializer", "handler" })
 	private Collection<Reactions> reactions;
-	
-	
-	@OneToMany(mappedBy = "users", cascade = CascadeType.ALL) 
+
+	@OneToMany(mappedBy = "users", cascade = CascadeType.ALL)
+	@JsonIgnoreProperties({ "hibernateLazyInitializer", "handler" })
 	private Collection<Orders> orders;
-	
-	@OneToMany(mappedBy = "users", cascade = CascadeType.ALL) 
+
+	@OneToMany(mappedBy = "users", cascade = CascadeType.ALL)
+	@JsonIgnoreProperties({ "hibernateLazyInitializer", "handler" })
 	private Collection<News> news;
-	
 
 	public Users() {
 		super();
 	}
-
-	
 
 	public Long getUserId() {
 		return userId;
@@ -183,14 +186,6 @@ public class Users {
 		this.city = city;
 	}
 
-	public boolean isOnline() {
-		return isOnline;
-	}
-
-	public void setOnline(boolean isOnline) {
-		this.isOnline = isOnline;
-	}
-
 	public Long getBalance() {
 		return balance;
 	}
@@ -228,11 +223,9 @@ public class Users {
 		return "Users [userId=" + userId + ", email=" + email + ", username=" + username + ", password=" + password
 				+ ", phoneNumber=" + phoneNumber + ", status=" + status + ", firstName=" + firstName + ", lastName="
 				+ lastName + ", avatarPath=" + avatarPath + ", backgroundImagePath=" + backgroundImagePath
-				+ ", address=" + address + ", city=" + city + ", isOnline=" + isOnline + ", balance=" + balance
-				+ ", isVacationMode=" + isVacationMode + ", role=" + role + ", isAutoWithdraw=" + isAutoWithdraw
-				+ ", followers=" + followers + ", reactions=" + reactions + ", orders=" + orders + "]";
+				+ ", address=" + address + ", city=" + city + ", balance=" + balance + ", isVacationMode="
+				+ isVacationMode + ", role=" + role + ", isAutoWithdraw=" + isAutoWithdraw + ", followers=" + followers
+				+ ", reactions=" + reactions + ", orders=" + orders + "]";
 	}
-	
-	
 
 }

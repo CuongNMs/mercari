@@ -1,6 +1,7 @@
 package com.cuongnm.mercari.utils;
 
 import java.io.Serializable;
+import java.util.List;
 
 public class ProductRequest implements Serializable {
 	/**
@@ -14,7 +15,7 @@ public class ProductRequest implements Serializable {
 	private String productVideoPath;
 	private int size;
 	private long brandId;
-	private long categoryId;
+	private List<Long> categoryId;
 	private int state;
 	private int weight;
 	private boolean isAllowOffer;
@@ -26,7 +27,7 @@ public class ProductRequest implements Serializable {
 	}
 
 	public ProductRequest(String productName, long price, String productDescribed, String productImagePath,
-			String productVideoPath, int size, long brandId, long categoryId, int state, int weight,
+			String productVideoPath, int size, long brandId, List<Long> categoryId, int state, int weight,
 			boolean isAllowOffer, int quality) {
 		super();
 		this.productName = productName;
@@ -99,11 +100,11 @@ public class ProductRequest implements Serializable {
 		this.brandId = brandId;
 	}
 
-	public long getCategoryId() {
+	public List<Long> getCategoryId() {
 		return categoryId;
 	}
 
-	public void setCategoryId(long categoryId) {
+	public void setCategoryId(List<Long> categoryId) {
 		this.categoryId = categoryId;
 	}
 

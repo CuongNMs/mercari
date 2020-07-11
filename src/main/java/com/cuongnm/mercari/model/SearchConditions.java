@@ -3,16 +3,25 @@ package com.cuongnm.mercari.model;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.OneToOne;
 import javax.persistence.Table;
 
+import org.hibernate.annotations.GenericGenerator;
+
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+
 @Entity
 @Table(name = "search_conditions")
 public class SearchConditions {
 	@Id
-	@GeneratedValue
+	@GeneratedValue(strategy = GenerationType.AUTO, generator="native")
+	@GenericGenerator(
+		    name = "native",
+		    strategy = "increment"
+		)
 	@Column(name = "search_condition_id")
 	private Long searchConditionId;
 
@@ -33,6 +42,7 @@ public class SearchConditions {
 	
 	@OneToOne 
     @JoinColumn(name = "user_id") 
+	@JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
 	private Users users;
 
 	public SearchConditions(String keyword, Long priceMin, Long priceMax, int quality, int state) {

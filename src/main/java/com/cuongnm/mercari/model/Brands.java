@@ -6,33 +6,42 @@ import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
+
+import org.hibernate.annotations.GenericGenerator;
+
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 @Entity
 @Table(name = "brands")
 public class Brands {
 	@Id
-	@GeneratedValue
+	@GeneratedValue(strategy = GenerationType.AUTO, generator = "native")
+	@GenericGenerator(name = "native", strategy = "increment")
 	@Column(name = "brand_id")
 	private Long brandId;
 
 	@Column(name = "brand_name")
 	private String brandName;
-	
-	@OneToMany(mappedBy = "brands", cascade = CascadeType.ALL) // Quan hệ 1-n với đối tượng ở dưới (Person) (1 địa điểm có nhiều người ở)
-    private Collection<Products> products;
-	
+
+	@OneToMany(mappedBy = "brands", cascade = CascadeType.ALL)
+	@JsonIgnoreProperties({ "hibernateLazyInitializer", "handler" })
+	private Collection<Products> products;
 
 	public Brands(String brandName) {
-		
 		this.brandName = brandName;
 	}
 
 	public Brands() {
 		super();
-		// TODO Auto-generated constructor stub
+	}
+
+	public Brands(Long brandId) {
+		super();
+		this.brandId = brandId;
 	}
 
 	public Long getBrandId() {

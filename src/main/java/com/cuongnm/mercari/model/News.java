@@ -5,20 +5,30 @@ import java.util.Date;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
-import javax.persistence.PrePersist;
+
 import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
+
+import org.hibernate.annotations.GenericGenerator;
+
+
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 @Entity
 @Table(name = "news")
 public class News {
 
 	@Id
-	@GeneratedValue
+	@GeneratedValue(strategy = GenerationType.AUTO, generator="native")
+	@GenericGenerator(
+		    name = "native",
+		    strategy = "increment"
+		)
 	@Column(name = "news_id")
 	private Long newsId;
 
@@ -33,7 +43,8 @@ public class News {
 	private Date createdDate;
 
 	@ManyToOne
-	@JoinColumn(name = "user_id") // thông qua khóa ngoại user_id
+	@JoinColumn(name = "user_id")
+	@JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
 	private Users users;
 	
 
@@ -69,7 +80,7 @@ public class News {
 	public Date getCreatedDate() {
 		return createdDate;
 	}
-	@PrePersist
+
 	public void setCreatedDate() {
 		this.createdDate = new Date();
 	}

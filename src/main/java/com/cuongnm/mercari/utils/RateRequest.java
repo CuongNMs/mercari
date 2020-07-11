@@ -18,7 +18,6 @@ public class RateRequest implements Serializable {
 
 	public RateRequest() {
 		super();
-		// TODO Auto-generated constructor stub
 	}
 
 	public Long getTargetUserId() {

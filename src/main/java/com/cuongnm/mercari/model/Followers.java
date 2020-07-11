@@ -3,35 +3,40 @@ package com.cuongnm.mercari.model;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
+
+import org.hibernate.annotations.GenericGenerator;
+
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 @Entity
 @Table(name = "followers")
 public class Followers {
 
 	@Id
-	@GeneratedValue
+	@GeneratedValue(strategy = GenerationType.AUTO, generator = "native")
+	@GenericGenerator(name = "native", strategy = "increment")
 	@Column(name = "follow_id")
 	private Long followId;
 
-	@Column(name = "follow_user_id")
-	private Long followUserId;
-
 	@ManyToOne
-	@JoinColumn(name = "user_id") // thông qua khóa ngoại user_id
+	@JoinColumn(name = "user_id")
+	@JsonIgnoreProperties({ "hibernateLazyInitializer", "handler" })
 	private Users users;
+
+	@Column(name = "follow_user_target")
+	private Long followUserTarget;
+
+	@Column(name = "follow_product_target")
+	private Long followProductTarget;
 
 	public Followers() {
 		super();
 		// TODO Auto-generated constructor stub
-	}
-
-	public Followers(Long followUserId) {
-		super();
-		this.followUserId = followUserId;
 	}
 
 	public Long getFollowId() {
@@ -42,12 +47,28 @@ public class Followers {
 		this.followId = followId;
 	}
 
-	public Long getFollowUserId() {
-		return followUserId;
+	public Long getFollowUserTarget() {
+		return followUserTarget;
 	}
 
-	public void setFollowUserId(Long followUserId) {
-		this.followUserId = followUserId;
+	public void setFollowUserTarget(Long followUserTarget) {
+		this.followUserTarget = followUserTarget;
+	}
+
+	public Long getFollowProductTarget() {
+		return followProductTarget;
+	}
+
+	public void setFollowProductTarget(Long followProductTarget) {
+		this.followProductTarget = followProductTarget;
+	}
+
+	public Users getUsers() {
+		return users;
+	}
+
+	public void setUsers(Users users) {
+		this.users = users;
 	}
 
 }

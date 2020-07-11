@@ -3,22 +3,23 @@ package com.cuongnm.mercari.utils;
 import java.io.Serializable;
 
 public class CategoryRequest implements Serializable {
+
 	/**
 	 * 
 	 */
-	private static final long serialVersionUID = -8108644847500020713L;
+	private static final long serialVersionUID = 5061708867119454552L;
 	private String categoryName;
-	private long parentCategoryId;
-
-	public CategoryRequest(String categoryName, long parentCategoryId) {
-		super();
-		this.categoryName = categoryName;
-		this.parentCategoryId = parentCategoryId;
-	}
+	private Long parentCategoryId;
 
 	public CategoryRequest() {
 		super();
 		// TODO Auto-generated constructor stub
+	}
+
+	public CategoryRequest(String categoryName, Long parentCategoryId) {
+		super();
+		this.categoryName = categoryName;
+		this.parentCategoryId = parentCategoryId;
 	}
 
 	public String getCategoryName() {
@@ -29,11 +30,11 @@ public class CategoryRequest implements Serializable {
 		this.categoryName = categoryName;
 	}
 
-	public long getParentCategoryId() {
+	public Long getParentCategoryId() {
 		return parentCategoryId;
 	}
 
-	public void setParentCategoryId(long parentCategoryId) {
+	public void setParentCategoryId(Long parentCategoryId) {
 		this.parentCategoryId = parentCategoryId;
 	}
 

@@ -8,22 +8,35 @@ import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.JoinTable;
 import javax.persistence.ManyToMany;
 import javax.persistence.ManyToOne;
-import javax.persistence.PrePersist;
+
 import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
+
+import org.hibernate.annotations.GenericGenerator;
+
+import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 
 @Entity
 @Table(name = "products")
 public class Products {
 
+	
+
 	@Id
-	@GeneratedValue
+	@GeneratedValue(strategy = GenerationType.AUTO, generator="native")
+	@GenericGenerator(
+		    name = "native",
+		    strategy = "increment"
+		)
 	@Column(name = "product_id")
 	private Long productId;
 
@@ -58,19 +71,18 @@ public class Products {
 	@Column(name = "quality")
 	private int quality;
 	
-	
-
-	@ManyToOne
+	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "brand_id") 
+	@JsonManagedReference
+	@JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
 	private Brands brands;
 
-	@ManyToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-	@JoinTable(name = "product_order", 
-			joinColumns = @JoinColumn(name = "product_id"), 
-			inverseJoinColumns = @JoinColumn(name = "order_id") 
-	)
-	private Collection<Orders> orders;
 
+	
+	@ManyToMany(mappedBy = "products", fetch = FetchType.LAZY)
+	@JsonBackReference(value="orders")
+	@JsonIgnoreProperties({ "hibernateLazyInitializer", "handler" })
+	private Collection<Orders> orders;
 	
 	
 	@ManyToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
@@ -78,6 +90,8 @@ public class Products {
 			joinColumns = @JoinColumn(name = "product_id"), 
 			inverseJoinColumns = @JoinColumn(name = "category_id")
 	)
+	@JsonBackReference(value="categories")
+	@JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
 	private Collection<Categories> categories;
 	
 
@@ -169,7 +183,7 @@ public class Products {
 		return createdDate;
 	}
 	
-	@PrePersist
+
 	public void setCreatedDate() {
 		this.createdDate = new Date();
 	}
@@ -188,6 +202,30 @@ public class Products {
 
 	public void setQuality(int quality) {
 		this.quality = quality;
+	}
+	
+	public Brands getBrands() {
+		return brands;
+	}
+
+	public void setBrands(Brands brands) {
+		this.brands = brands;
+	}
+
+	public Collection<Orders> getOrders() {
+		return orders;
+	}
+
+	public void setOrders(Collection<Orders> orders) {
+		this.orders = orders;
+	}
+
+	public Collection<Categories> getCategories() {
+		return categories;
+	}
+
+	public void setCategories(Collection<Categories> categories) {
+		this.categories = categories;
 	}
 
 }

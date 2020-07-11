@@ -15,7 +15,6 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
-
 @Configuration
 @EnableWebSecurity
 @EnableGlobalMethodSecurity(prePostEnabled = true)
@@ -49,13 +48,16 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
 
 	@Override
 	protected void configure(HttpSecurity httpSecurity) throws Exception {
-	
-		httpSecurity.csrf().disable()
-				.authorizeRequests().antMatchers("/login","/createCodeResetPassword", "/getCategories", "/createCategory", "/signup", "/checkCodeResetPassword", "/createBrand", "/createSize").permitAll().
-				anyRequest().authenticated().and().
-				exceptionHandling().authenticationEntryPoint(jwtAuthenticationEntryPoint).and().sessionManagement()
+
+		httpSecurity.csrf().disable().authorizeRequests()
+				.antMatchers("/login","/search", "/buyProduct", "/updateProduct", "/createCodeResetPassword", "/getCategories",
+						"/createCategory", "/signup", "/checkCodeResetPassword", "/createBrand", "/createSize",
+						"/createProduct")
+				.permitAll().anyRequest().authenticated().and().exceptionHandling()
+				.authenticationEntryPoint(jwtAuthenticationEntryPoint).and().sessionManagement()
 				.sessionCreationPolicy(SessionCreationPolicy.STATELESS);
 
 		httpSecurity.addFilterBefore(jwtRequestFilter, UsernamePasswordAuthenticationFilter.class);
+
 	}
 }
