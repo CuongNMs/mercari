@@ -34,32 +34,36 @@ public class Categories {
 	@Column(name = "category_name")
 	private String categoryName;
 
+	@Column(name = "created_user")
+	private Long createdUser;
+
+	public Long getCreatedUser() {
+		return createdUser;
+	}
+
+	public void setCreatedUser(Long createdUser) {
+		this.createdUser = createdUser;
+	}
+
 	@OneToMany(mappedBy = "parentCategory", fetch = FetchType.LAZY)
 	@JsonBackReference
-	@JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
+	@JsonIgnoreProperties({ "hibernateLazyInitializer", "handler" })
 	private Collection<Categories> children;
 
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "parent_category_id", referencedColumnName = "category_id")
 	@JsonManagedReference
-	@JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
+	@JsonIgnoreProperties({ "hibernateLazyInitializer", "handler" })
 	private Categories parentCategory;
 
-	
-	
-	
-	
 	@ManyToMany(mappedBy = "categories", fetch = FetchType.LAZY)
 	@JsonBackReference
-	@JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
+	@JsonIgnoreProperties({ "hibernateLazyInitializer", "handler" })
 	private Collection<Products> products;
 
-	
-	
-	
 	@OneToMany(mappedBy = "categories", cascade = CascadeType.ALL)
 	@JsonBackReference
-	@JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
+	@JsonIgnoreProperties({ "hibernateLazyInitializer", "handler" })
 	private Collection<Sizes> sizes;
 
 	public Categories() {

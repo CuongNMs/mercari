@@ -13,7 +13,7 @@ public class SearchRequest implements Serializable {
 	private List<Long> brandId;
 	private Long priceMax;
 	private Long priceMin;
-
+	
 	public SearchRequest() {
 		super();
 		// TODO Auto-generated constructor stub

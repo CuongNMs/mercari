@@ -14,22 +14,19 @@ public class BuyRequest implements Serializable {
 	private String city;
 	private int status;
 	private Map<Long, Integer> setProducts;
-	private Long userId;
 
 	public BuyRequest() {
 		super();
 		// TODO Auto-generated constructor stub
 	}
 
-	public BuyRequest(int payType, String address, String city, int status, Map<Long, Integer> setProducts, Long userId,
-			Long amount) {
+	public BuyRequest(int payType, String address, String city, int status, Map<Long, Integer> setProducts) {
 		super();
 		this.payType = payType;
 		this.address = address;
 		this.city = city;
 		this.status = status;
 		this.setSetProducts(setProducts);
-		this.userId = userId;
 	}
 
 	public int getPayType() {
@@ -62,14 +59,6 @@ public class BuyRequest implements Serializable {
 
 	public void setStatus(int status) {
 		this.status = status;
-	}
-
-	public Long getUserId() {
-		return userId;
-	}
-
-	public void setUserId(Long userId) {
-		this.userId = userId;
 	}
 
 	public Map<Long, Integer> getSetProducts() {

@@ -13,6 +13,7 @@ import javax.persistence.Table;
 
 import org.hibernate.annotations.GenericGenerator;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 @Entity
@@ -32,6 +33,7 @@ public class Users {
 	private String username;
 
 	@Column(name = "password", nullable = false)
+	@JsonIgnore
 	private String password;
 
 	@Column(name = "phone_number", nullable = false)
@@ -65,7 +67,7 @@ public class Users {
 	private boolean isVacationMode;
 
 	@Column(name = "role")
-	private Integer role;
+	private int role;
 
 	@Column(name = "is_auto_withdraw")
 	private boolean isAutoWithdraw;
@@ -202,11 +204,11 @@ public class Users {
 		this.isVacationMode = isVacationMode;
 	}
 
-	public Integer getRole() {
+	public int getRole() {
 		return role;
 	}
 
-	public void setRole(Integer role) {
+	public void setRole(int role) {
 		this.role = role;
 	}
 

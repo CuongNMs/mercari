@@ -27,6 +27,17 @@ public class Brands {
 	@Column(name = "brand_name")
 	private String brandName;
 
+	@Column(name = "created_user")
+	private Long createdUser;
+
+	public Long getCreatedUser() {
+		return createdUser;
+	}
+
+	public void setCreatedUser(Long createdUser) {
+		this.createdUser = createdUser;
+	}
+
 	@OneToMany(mappedBy = "brands", cascade = CascadeType.ALL)
 	@JsonIgnoreProperties({ "hibernateLazyInitializer", "handler" })
 	private Collection<Products> products;

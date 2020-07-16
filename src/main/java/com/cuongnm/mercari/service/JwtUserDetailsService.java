@@ -59,6 +59,8 @@ public class JwtUserDetailsService implements UserDetailsService {
 
 	public Users updatePassword(String username, String password) {
 		Users user = userRepository.findByUsername(username);
+		if (user == null)
+			return null;
 		user.setPassword(password);
 		return userRepository.save(user);
 	}

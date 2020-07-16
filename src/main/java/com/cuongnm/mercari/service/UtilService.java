@@ -4,7 +4,10 @@ import java.util.HashMap;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
+
+import javax.persistence.EntityNotFoundException;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
@@ -14,25 +17,30 @@ import org.springframework.stereotype.Service;
 import com.cuongnm.mercari.exception.DataException;
 import com.cuongnm.mercari.exception.UserInvalidException;
 import com.cuongnm.mercari.model.Brands;
+import com.cuongnm.mercari.model.Campaigns;
 import com.cuongnm.mercari.model.Categories;
 import com.cuongnm.mercari.model.Followers;
 import com.cuongnm.mercari.model.News;
 import com.cuongnm.mercari.model.Orders;
 import com.cuongnm.mercari.model.Products;
 import com.cuongnm.mercari.model.Reactions;
+import com.cuongnm.mercari.model.SearchConditions;
 import com.cuongnm.mercari.model.Sizes;
 import com.cuongnm.mercari.model.Users;
 import com.cuongnm.mercari.model.VerifyCodes;
 import com.cuongnm.mercari.repository.BrandRepository;
+import com.cuongnm.mercari.repository.CampaignRepository;
 import com.cuongnm.mercari.repository.CategoryRepository;
 import com.cuongnm.mercari.repository.FollowerRepository;
 import com.cuongnm.mercari.repository.NewsRepository;
 import com.cuongnm.mercari.repository.OrderRepository;
 import com.cuongnm.mercari.repository.ProductRepository;
 import com.cuongnm.mercari.repository.ReactionRepository;
+import com.cuongnm.mercari.repository.SearchConditionRepository;
 import com.cuongnm.mercari.repository.SizeRepository;
 import com.cuongnm.mercari.repository.UserRepository;
 import com.cuongnm.mercari.repository.VerifyCodeRepository;
+import com.cuongnm.mercari.utils.UpdateUserRequest;
 
 @Service
 public class UtilService {
@@ -67,6 +75,12 @@ public class UtilService {
 	@Autowired
 	private OrderRepository oRepository;
 
+	@Autowired
+	private CampaignRepository caRepository;
+
+	@Autowired
+	private SearchConditionRepository sdRepository;
+
 	public String createCodeVerify(String username) throws UserInvalidException {
 		String code = null;
 		try {
@@ -78,11 +92,22 @@ public class UtilService {
 			saveObj.setVerifyCode(code);
 			saveObj.setUsers(user);
 			vRepository.save(saveObj);
-
 		} catch (UserInvalidException e1) {
 			throw new UserInvalidException("User is invalid");
 		}
 		return code;
+	}
+
+	public String getCodeVerify(String username) {
+		try {
+			Users user = uRepository.findByUsername(username);
+			if (user == null) {
+				return null;
+			}
+			return vRepository.getVerifyCodeByUserId(user.getUserId());
+		} catch (Exception e) {
+			return null;
+		}
 	}
 
 	public Orders addOrder(Orders order) throws IllegalArgumentException {
@@ -118,20 +143,27 @@ public class UtilService {
 	}
 
 	public Products updateProduct(Long productId, Products productInfo) throws DataException {
-		Products productFound = pRepository.getOne(productId);
-		if (productFound == null)
-			throw new DataException("No Data or end of list data");
-		productFound.setProductName(productInfo.getProductName());
-		productFound.setProductDescribed(productInfo.getProductDescribed());
-		productFound.setProductImagePath(productInfo.getProductImagePath());
-		productFound.setProductVideoPath(productInfo.getProductVideoPath());
-		productFound.setCategories(productInfo.getCategories());
-		productFound.setBrands(productInfo.getBrands());
-		return pRepository.save(productFound);
+		Optional<Products> productFound = pRepository.findById(productId);
+		if (productFound.isPresent()) {
+			Products product = productFound.get();
+			product.setProductName(productInfo.getProductName());
+			product.setProductDescribed(productInfo.getProductDescribed());
+			product.setProductImagePath(productInfo.getProductImagePath());
+			product.setProductVideoPath(productInfo.getProductVideoPath());
+			product.setCategories(productInfo.getCategories());
+			product.setBrands(productInfo.getBrands());
+			pRepository.save(product);
+			return product;
+		}
+		return null;
 	}
 
 	public Set<Products> getProductByIds(Set<Long> productIds) {
 		return pRepository.findByIds(productIds);
+	}
+
+	public Products getProductById(Long productId) {
+		return pRepository.getOne(productId);
 	}
 
 	public void deleteProduct(String id) {
@@ -267,53 +299,56 @@ public class UtilService {
 		}
 	}
 
+	public Reactions likeUser(Reactions reaction) {
+		return rRepository.save(reaction);
+	}
+
 	public Sizes addSize(Sizes sizes) {
 		return sRepository.save(sizes);
 	}
 
-	public Users updateUser(Users user, Long id) throws DataException {
-		Users userFound = uRepository.getOne(id);
-		if (userFound == null)
-			throw new DataException("No Data or end of list data");
-		userFound.setAddress(user.getAddress());
-		userFound.setAutoWithdraw(user.isAutoWithdraw());
-		userFound.setAvatarPath(user.getAvatarPath());
-		userFound.setBackgroundImagePath(user.getBackgroundImagePath());
-		userFound.setBalance(user.getBalance());
-		userFound.setCity(user.getCity());
-		userFound.setEmail(user.getEmail());
-		userFound.setFirstName(user.getFirstName());
-		userFound.setLastName(user.getLastName());
-		userFound.setPhoneNumber(user.getPhoneNumber());
-		userFound.setRole(user.getRole());
-		userFound.setStatus(user.getStatus());
-		userFound.setVacationMode(user.isVacationMode());
-		if (uRepository.save(userFound) == null) {
-			throw new DataException("Update failed");
+	public Users updateUser(UpdateUserRequest userInfo, Long id) throws DataException, EntityNotFoundException {
+		Optional<Users> userFound = uRepository.findById(id);
+		if (userFound.isPresent()) {
+			Users user = userFound.get();
+			user.setAddress(userInfo.getAddress());
+			user.setAvatarPath(userInfo.getAvatarPath());
+			user.setBackgroundImagePath(userInfo.getBackgroundImagePath());
+			user.setBalance(userInfo.getBalance());
+			user.setCity(userInfo.getCity());
+			user.setEmail(userInfo.getEmail());
+			user.setFirstName(userInfo.getFirstName());
+			user.setLastName(userInfo.getLastName());
+			user.setPhoneNumber(userInfo.getPhoneNumber());
+			user.setStatus(userInfo.getStatus());
+			uRepository.save(user);
+			return user;
 		}
-		return user;
+		return null;
 
 	}
 
-	public Brands updateBrand(Brands brand, long id) throws DataException {
-		Brands brandFound = bRepository.getOne(id);
-		if (brandFound == null)
-			throw new DataException("No Data or end of list data");
-		brandFound.setBrandName(brand.getBrandName());
-		if (bRepository.save(brandFound) == null) {
-			throw new DataException("Update failed");
+	public Brands updateBrand(Brands brandInfo, long id) throws DataException {
+		Optional<Brands> brandFound = bRepository.findById(id);
+		if (brandFound.isPresent()) {
+			Brands brand = brandFound.get();
+			brand.setBrandName(brandInfo.getBrandName());
+			bRepository.save(brand);
+			return brand;
 		}
-		return brand;
+		return null;
 	}
 
-	public Categories updateCategory(Long categoryId, Categories categoryInfo) throws DataException {
-		Categories categoryFound = cRepository.getOne(categoryId);
-		if (categoryFound == null)
-			throw new DataException("No Data or end of list data");
-		categoryFound.setCategoryName(categoryInfo.getCategoryName());
-		if (cRepository.save(categoryFound) == null) {
-			throw new DataException("Update failed");
+	public Categories updateCategory(Long id, Categories categoryInfo) throws DataException {
+
+		Optional<Categories> categoryFound = cRepository.findById(id);
+		if (categoryFound.isPresent()) {
+			Categories category = categoryFound.get();
+			category.setCategoryName(categoryInfo.getCategoryName());
+			cRepository.save(category);
+			return category;
 		}
+
 		return null;
 	}
 
@@ -331,6 +366,10 @@ public class UtilService {
 		} catch (Exception e) {
 			throw new DataException("Delete failed");
 		}
+	}
+
+	public Campaigns createCampaign(Campaigns campaigns) throws DataException {
+		return caRepository.save(campaigns);
 	}
 
 	public News addNews(News news) {
@@ -354,6 +393,18 @@ public class UtilService {
 	public List<Products> searchByKeyword(String keyword) {
 		List<Products> results = pRepository.searchByKeyword(keyword);
 		return results;
+	}
+
+	public List<Campaigns> getCampaigns() {
+		return caRepository.findAll();
+	}
+
+	public Campaigns getCampaign(long id) {
+		return caRepository.getOne(id);
+	}
+
+	public SearchConditions addSearchCondition(SearchConditions searchConditions) {
+		return sdRepository.save(searchConditions);
 	}
 
 }

@@ -16,7 +16,6 @@ import javax.persistence.TemporalType;
 
 import org.hibernate.annotations.GenericGenerator;
 
-
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 @Entity
@@ -24,11 +23,8 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 public class News {
 
 	@Id
-	@GeneratedValue(strategy = GenerationType.AUTO, generator="native")
-	@GenericGenerator(
-		    name = "native",
-		    strategy = "increment"
-		)
+	@GeneratedValue(strategy = GenerationType.AUTO, generator = "native")
+	@GenericGenerator(name = "native", strategy = "increment")
 	@Column(name = "news_id")
 	private Long newsId;
 
@@ -37,17 +33,23 @@ public class News {
 
 	@Column(name = "content")
 	private String content;
-	
+
 	@Temporal(TemporalType.TIMESTAMP)
 	@Column(name = "created_date")
 	private Date createdDate;
 
 	@ManyToOne
 	@JoinColumn(name = "user_id")
-	@JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
+	@JsonIgnoreProperties({ "hibernateLazyInitializer", "handler" })
 	private Users users;
-	
 
+	public Users getUsers() {
+		return users;
+	}
+
+	public void setUsers(Users users) {
+		this.users = users;
+	}
 
 	public News() {
 

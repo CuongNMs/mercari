@@ -14,11 +14,8 @@ import org.hibernate.annotations.GenericGenerator;
 public class Campaigns {
 
 	@Id
-	@GeneratedValue(strategy = GenerationType.AUTO, generator="native")
-	@GenericGenerator(
-		    name = "native",
-		    strategy = "increment"
-		)
+	@GeneratedValue(strategy = GenerationType.AUTO, generator = "native")
+	@GenericGenerator(name = "native", strategy = "increment")
 	@Column(name = "campaigns_id")
 	private Long campaignsId;
 
@@ -38,6 +35,13 @@ public class Campaigns {
 
 	public Campaigns(String campaignsName, String campaignDescribed) {
 		this.campaignsName = campaignsName;
+		this.campaignDescribed = campaignDescribed;
+	}
+
+	public Campaigns(String campaignsName, String campaignImagePath, String campaignDescribed) {
+		super();
+		this.campaignsName = campaignsName;
+		this.campaignImagePath = campaignImagePath;
 		this.campaignDescribed = campaignDescribed;
 	}
 

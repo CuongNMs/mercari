@@ -17,41 +17,31 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 @Table(name = "search_conditions")
 public class SearchConditions {
 	@Id
-	@GeneratedValue(strategy = GenerationType.AUTO, generator="native")
-	@GenericGenerator(
-		    name = "native",
-		    strategy = "increment"
-		)
+	@GeneratedValue(strategy = GenerationType.AUTO, generator = "native")
+	@GenericGenerator(name = "native", strategy = "increment")
 	@Column(name = "search_condition_id")
 	private Long searchConditionId;
 
 	@Column(name = "keyword")
 	private String keyword;
 
-	@Column(name = "priceMin")
+	@Column(name = "price_min")
 	private Long priceMin;
 
-	@Column(name = "priceMax")
+	@Column(name = "price_max")
 	private Long priceMax;
 
-	@Column(name = "quality")
-	private int quality;
-
-	@Column(name = "state")
-	private int state;
-	
-	@OneToOne 
-    @JoinColumn(name = "user_id") 
-	@JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
+	@OneToOne
+	@JoinColumn(name = "user_id")
+	@JsonIgnoreProperties({ "hibernateLazyInitializer", "handler" })
 	private Users users;
 
-	public SearchConditions(String keyword, Long priceMin, Long priceMax, int quality, int state) {
+	public SearchConditions(String keyword, Long priceMin, Long priceMax, Users users) {
 		super();
 		this.keyword = keyword;
 		this.priceMin = priceMin;
 		this.priceMax = priceMax;
-		this.quality = quality;
-		this.state = state;
+		this.users = users;
 	}
 
 	public SearchConditions() {
@@ -88,22 +78,6 @@ public class SearchConditions {
 
 	public void setPriceMax(Long priceMax) {
 		this.priceMax = priceMax;
-	}
-
-	public int getQuality() {
-		return quality;
-	}
-
-	public void setQuality(int quality) {
-		this.quality = quality;
-	}
-
-	public int getState() {
-		return state;
-	}
-
-	public void setState(int state) {
-		this.state = state;
 	}
 
 }

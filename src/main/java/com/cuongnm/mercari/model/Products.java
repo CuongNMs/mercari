@@ -29,14 +29,9 @@ import com.fasterxml.jackson.annotation.JsonManagedReference;
 @Table(name = "products")
 public class Products {
 
-	
-
 	@Id
-	@GeneratedValue(strategy = GenerationType.AUTO, generator="native")
-	@GenericGenerator(
-		    name = "native",
-		    strategy = "increment"
-		)
+	@GeneratedValue(strategy = GenerationType.AUTO, generator = "native")
+	@GenericGenerator(name = "native", strategy = "increment")
 	@Column(name = "product_id")
 	private Long productId;
 
@@ -70,30 +65,26 @@ public class Products {
 
 	@Column(name = "quality")
 	private int quality;
-	
+
+	@Column(name = "created_user")
+	private long createdUser;
+
 	@ManyToOne(fetch = FetchType.LAZY)
-	@JoinColumn(name = "brand_id") 
+	@JoinColumn(name = "brand_id")
 	@JsonManagedReference
-	@JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
+	@JsonIgnoreProperties({ "hibernateLazyInitializer", "handler" })
 	private Brands brands;
 
-
-	
 	@ManyToMany(mappedBy = "products", fetch = FetchType.LAZY)
-	@JsonBackReference(value="orders")
+	@JsonBackReference(value = "orders")
 	@JsonIgnoreProperties({ "hibernateLazyInitializer", "handler" })
 	private Collection<Orders> orders;
-	
-	
+
 	@ManyToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-	@JoinTable(name = "product_category", 
-			joinColumns = @JoinColumn(name = "product_id"), 
-			inverseJoinColumns = @JoinColumn(name = "category_id")
-	)
-	@JsonBackReference(value="categories")
-	@JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
+	@JoinTable(name = "product_category", joinColumns = @JoinColumn(name = "product_id"), inverseJoinColumns = @JoinColumn(name = "category_id"))
+	@JsonBackReference(value = "categories")
+	@JsonIgnoreProperties({ "hibernateLazyInitializer", "handler" })
 	private Collection<Categories> categories;
-	
 
 	public Products() {
 		super();
@@ -101,8 +92,7 @@ public class Products {
 	}
 
 	public Products(String productName, Long price, String productDescribed, String productImagePath,
-			String productVideoPath, int state, int weight, boolean isAllowOffer,
-			int quality) {
+			String productVideoPath, int state, int weight, boolean isAllowOffer, int quality, long createdUser) {
 		super();
 		this.productName = productName;
 		this.price = price;
@@ -113,6 +103,15 @@ public class Products {
 		this.weight = weight;
 		this.isAllowOffer = isAllowOffer;
 		this.quality = quality;
+		this.createdUser = createdUser;
+	}
+
+	public long getCreatedUser() {
+		return createdUser;
+	}
+
+	public void setCreatedUser(long createdUser) {
+		this.createdUser = createdUser;
 	}
 
 	public Long getProductId() {
@@ -182,7 +181,6 @@ public class Products {
 	public Date getCreatedDate() {
 		return createdDate;
 	}
-	
 
 	public void setCreatedDate() {
 		this.createdDate = new Date();
@@ -203,7 +201,7 @@ public class Products {
 	public void setQuality(int quality) {
 		this.quality = quality;
 	}
-	
+
 	public Brands getBrands() {
 		return brands;
 	}

@@ -5,10 +5,12 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import javax.persistence.EntityNotFoundException;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
@@ -17,28 +19,31 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.cuongnm.mercari.config.JwtTokenUtil;
 import com.cuongnm.mercari.exception.DataException;
 import com.cuongnm.mercari.model.Brands;
+import com.cuongnm.mercari.model.Campaigns;
 import com.cuongnm.mercari.model.Categories;
 import com.cuongnm.mercari.model.Followers;
-import com.cuongnm.mercari.model.JwtBlacklist;
+
 import com.cuongnm.mercari.model.News;
 import com.cuongnm.mercari.model.Orders;
 import com.cuongnm.mercari.model.Products;
 import com.cuongnm.mercari.model.Reactions;
-import com.cuongnm.mercari.model.Sizes;
+import com.cuongnm.mercari.model.SearchConditions;
 import com.cuongnm.mercari.model.Users;
 
 import com.cuongnm.mercari.service.JwtUserDetailsService;
 import com.cuongnm.mercari.service.UtilService;
 import com.cuongnm.mercari.utils.BuyRequest;
+import com.cuongnm.mercari.utils.CampaignRequest;
 import com.cuongnm.mercari.utils.CategoryRequest;
 import com.cuongnm.mercari.utils.DefaultResponse;
 import com.cuongnm.mercari.utils.ExceptionResponse;
+import com.cuongnm.mercari.utils.NewsRequest;
 import com.cuongnm.mercari.utils.ProductRequest;
 import com.cuongnm.mercari.utils.RateRequest;
 import com.cuongnm.mercari.utils.SearchRequest;
+import com.cuongnm.mercari.utils.UpdateUserRequest;
 
 @RestController
 public class UserController {
@@ -48,9 +53,6 @@ public class UserController {
 
 	@Autowired
 	private UtilService uService;
-
-	@Autowired
-	private JwtTokenUtil jwtTokenUtil;
 
 	@Autowired
 	private PasswordEncoder bcryptEncoder;
@@ -64,11 +66,12 @@ public class UserController {
 
 	@RequestMapping(value = "/getInfo", method = RequestMethod.GET)
 	public ResponseEntity<?> getInfoUser(@RequestHeader(value = "Authorization", required = false) String Authorization,
-			@RequestParam String id) {
+			@RequestParam(value = "id", required = false) String id) {
 		Users user = null;
 		try {
 			if (Authorization == null) {
 				user = uService.getUserInfo(Long.parseLong(id));
+				user.setPassword("");
 			} else {
 				String username = userDetailsService.getUsernameFromToken(Authorization.substring(7));
 				user = userDetailsService.getUserByUsername(username);
@@ -82,16 +85,28 @@ public class UserController {
 	}
 
 	@RequestMapping(value = "/updateUserInfo", method = RequestMethod.PUT)
-	public ResponseEntity<?> updateUserInfo(@RequestParam String id, @RequestBody Users user) {
+	public ResponseEntity<?> updateUserInfo(@RequestHeader String Authorization, @RequestParam String id,
+			@RequestBody UpdateUserRequest userRequest) {
+		Users user = null;
 		try {
-			return ResponseEntity.ok(new DefaultResponse("1000", "OK", uService.updateUser(user, Long.parseLong(id))));
+			String username = userDetailsService.getUsernameFromToken(Authorization.substring(7));
+			if (userDetailsService.getUserByUsername(username).getUserId().equals(Long.parseLong(id))) {
+				user = uService.updateUser(userRequest, Long.parseLong(id));
+				return ResponseEntity.ok(new DefaultResponse("1000", "OK", user));
+			}
+			return new ResponseEntity<ExceptionResponse>(new ExceptionResponse("9991", "No authorize to update user"),
+					HttpStatus.BAD_REQUEST);
 		} catch (NumberFormatException e) {
-			return new ResponseEntity<ExceptionResponse>(new ExceptionResponse("9999", "Exception error"),
+			return new ResponseEntity<ExceptionResponse>(new ExceptionResponse("9996", "Number format error"),
 					HttpStatus.BAD_REQUEST);
 		} catch (DataException e) {
 			return new ResponseEntity<ExceptionResponse>(new ExceptionResponse("9999", "Exception error"),
 					HttpStatus.BAD_REQUEST);
+		} catch (EntityNotFoundException e) {
+			return new ResponseEntity<ExceptionResponse>(new ExceptionResponse("9994", "No Data or end of list data"),
+					HttpStatus.BAD_REQUEST);
 		}
+
 	}
 
 	@RequestMapping(value = "/getUserFollowers", method = RequestMethod.GET)
@@ -148,6 +163,7 @@ public class UserController {
 	// =====================================================================
 
 	@RequestMapping(value = "/createBrand", method = RequestMethod.POST)
+	@PreAuthorize("@appAuthorizer.authorize(authentication, this)")
 	public ResponseEntity<?> createBrand(@RequestBody Brands brand) {
 		return ResponseEntity.ok(new DefaultResponse("1000", "OK", uService.addBrand(brand)));
 	}
@@ -165,6 +181,7 @@ public class UserController {
 	}
 
 	@RequestMapping(value = "/updateBrand", method = RequestMethod.PUT)
+	@PreAuthorize("@appAuthorizer.authorize(authentication, this)")
 	public ResponseEntity<?> updateBrands(@RequestParam String brandId, @RequestBody Brands brand) {
 		try {
 			return ResponseEntity
@@ -179,6 +196,7 @@ public class UserController {
 	}
 
 	@RequestMapping(value = "/deleteBrand", method = RequestMethod.DELETE)
+	@PreAuthorize("@appAuthorizer.authorize(authentication, this)")
 	public ResponseEntity<?> deleteBrands(@RequestParam String brandId) {
 		try {
 			uService.deleteBrand(Long.parseLong(brandId));
@@ -198,6 +216,7 @@ public class UserController {
 	// ================================================================
 
 	@RequestMapping(value = "/createCategory", method = RequestMethod.POST)
+	@PreAuthorize("@appAuthorizer.authorize(authentication, this)")
 	public ResponseEntity<?> createCategory(@RequestBody CategoryRequest categoryInfo) {
 		Categories result = null;
 		try {
@@ -230,6 +249,7 @@ public class UserController {
 	}
 
 	@RequestMapping(value = "/updateCategory", method = RequestMethod.PUT)
+	@PreAuthorize("@appAuthorizer.authorize(authentication, this)")
 	public ResponseEntity<?> updateCategory(@RequestParam String categoryId, @RequestBody Categories categoryInfo) {
 		Categories result = null;
 		try {
@@ -242,6 +262,7 @@ public class UserController {
 	}
 
 	@RequestMapping(value = "/deleteCategory", method = RequestMethod.DELETE)
+	@PreAuthorize("@appAuthorizer.authorize(authentication, this)")
 	public ResponseEntity<?> deleteCategory(@RequestParam String categoryId) {
 		try {
 			uService.deleteCategory(Long.parseLong(categoryId));
@@ -325,23 +346,30 @@ public class UserController {
 	}
 
 	@RequestMapping(value = "/updateProduct", method = RequestMethod.PUT)
-	public ResponseEntity<?> updateProduct(@RequestParam String productId, @RequestBody ProductRequest productInfo) {
+	public ResponseEntity<?> updateProduct(@RequestHeader String Authorization, @RequestParam String productId,
+			@RequestBody ProductRequest productInfo) {
 		try {
-			Products product = new Products();
-			product.setProductName(productInfo.getProductName());
-			product.setPrice(productInfo.getPrice());
-			product.setProductDescribed(productInfo.getProductDescribed());
-			product.setProductImagePath(productInfo.getProductImagePath());
-			product.setProductVideoPath(productInfo.getProductVideoPath());
-			product.setState(productInfo.getState());
-			product.setWeight(productInfo.getWeight());
-			product.setAllowOffer(productInfo.isAllowOffer());
-			product.setQuality(productInfo.getQuality());
-			product.setBrands(uService.getBrand(productInfo.getBrandId()));
-			List<Categories> categories = uService.getCategories(productInfo.getCategoryId());
-			product.setCategories(categories);
-			Products result = uService.updateProduct(Long.parseLong(productId), product);
-			return ResponseEntity.ok(new DefaultResponse("1000", "OK", result));
+			String username = userDetailsService.getUsernameFromToken(Authorization.substring(7));
+			Long createdUser = uService.getProductById(Long.parseLong(productId)).getCreatedUser();
+			if (userDetailsService.getUserByUsername(username).getUserId().equals(createdUser)) {
+				Products product = new Products();
+				product.setProductName(productInfo.getProductName());
+				product.setPrice(productInfo.getPrice());
+				product.setProductDescribed(productInfo.getProductDescribed());
+				product.setProductImagePath(productInfo.getProductImagePath());
+				product.setProductVideoPath(productInfo.getProductVideoPath());
+				product.setState(productInfo.getState());
+				product.setWeight(productInfo.getWeight());
+				product.setAllowOffer(productInfo.isAllowOffer());
+				product.setQuality(productInfo.getQuality());
+				product.setBrands(uService.getBrand(productInfo.getBrandId()));
+				List<Categories> categories = uService.getCategories(productInfo.getCategoryId());
+				product.setCategories(categories);
+				Products result = uService.updateProduct(Long.parseLong(productId), product);
+				return ResponseEntity.ok(new DefaultResponse("1000", "OK", result));
+			}
+			return new ResponseEntity<ExceptionResponse>(
+					new ExceptionResponse("9990", "No authorize to update product"), HttpStatus.BAD_REQUEST);
 		} catch (Exception e) {
 			return new ResponseEntity<ExceptionResponse>(new ExceptionResponse("9999", "Exception error"),
 					HttpStatus.BAD_REQUEST);
@@ -359,6 +387,21 @@ public class UserController {
 				results = uService.searchByKeyword(searchRequest.getKeyword());
 			}
 			return ResponseEntity.ok(new DefaultResponse("1000", "OK", results));
+		} catch (Exception e) {
+			return new ResponseEntity<ExceptionResponse>(new ExceptionResponse("9999", "Exception error"),
+					HttpStatus.BAD_REQUEST);
+		}
+	}
+
+	@RequestMapping(value = "/saveSearchConditions", method = RequestMethod.POST)
+	public ResponseEntity<?> saveSearchConditions(@RequestHeader String Authorization,
+			@RequestBody SearchRequest searchRequest) {
+		try {
+			String username = userDetailsService.getUsernameFromToken(Authorization.substring(7));
+			Users user = userDetailsService.getUserByUsername(username);
+			SearchConditions searchConditions = uService.addSearchCondition(new SearchConditions(
+					searchRequest.getKeyword(), searchRequest.getPriceMin(), searchRequest.getPriceMax(), user));
+			return ResponseEntity.ok(new DefaultResponse("1000", "OK", searchConditions));
 		} catch (Exception e) {
 			return new ResponseEntity<ExceptionResponse>(new ExceptionResponse("9999", "Exception error"),
 					HttpStatus.BAD_REQUEST);
@@ -393,34 +436,16 @@ public class UserController {
 	}
 
 	@RequestMapping({ "/addNews" })
-	public ResponseEntity<?> addNews(@RequestBody News news) {
+	public ResponseEntity<?> addNews(@RequestHeader String Authorization, @RequestBody NewsRequest news) {
 		try {
-			news = uService.addNews(news);
-			return ResponseEntity.ok(new DefaultResponse("1000", "OK", news));
-		} catch (Exception e) {
-			return new ResponseEntity<ExceptionResponse>(new ExceptionResponse("9999", "Exception error"),
-					HttpStatus.BAD_REQUEST);
-		}
-	}
-
-	// End of news request
-
-	@RequestMapping(value = "/createSize", method = RequestMethod.POST)
-	public ResponseEntity<?> createSize(@RequestBody Sizes sizes) {
-		return ResponseEntity.ok(new DefaultResponse("1000", "OK", uService.addSize(sizes)));
-	}
-
-	@RequestMapping(value = "/customLogout", method = RequestMethod.POST)
-	public ResponseEntity<?> customLogout(@RequestHeader String Authorization) throws Exception {
-		try {
-			userDetailsService.clearTokenBacklistTable();
-			String token = Authorization.substring(7);
-			JwtBlacklist jwtBlacklist = new JwtBlacklist();
-			jwtBlacklist.setToken(token);
-			jwtBlacklist.setExpiredDate(jwtTokenUtil.getExpirationDateFromToken(token));
-			userDetailsService.saveJwtBlacklistToken(jwtBlacklist);
-			SecurityContextHolder.getContext().setAuthentication(null);
-			return ResponseEntity.ok(new DefaultResponse("1000", "OK", null));
+			String username = userDetailsService.getUsernameFromToken(Authorization.substring(7));
+			Users user = userDetailsService.getUserByUsername(username);
+			News newsInfo = new News();
+			newsInfo.setTitle(news.getTitle());
+			newsInfo.setContent(news.getContent());
+			newsInfo.setUsers(user);
+			newsInfo.setCreatedDate();
+			return ResponseEntity.ok(new DefaultResponse("1000", "OK", uService.addNews(newsInfo)));
 		} catch (Exception e) {
 			return new ResponseEntity<ExceptionResponse>(new ExceptionResponse("9999", "Exception error"),
 					HttpStatus.BAD_REQUEST);
@@ -475,6 +500,70 @@ public class UserController {
 		try {
 			result = uService.getListRate(user.getUserId(), rateRequest.getTargetUserId(), rateRequest.getLevel());
 			return ResponseEntity.ok(new DefaultResponse("1000", "OK", result));
+		} catch (Exception e) {
+			return new ResponseEntity<ExceptionResponse>(new ExceptionResponse("9999", "Exception error"),
+					HttpStatus.BAD_REQUEST);
+		}
+	}
+
+	@RequestMapping({ "/createCampaign" })
+	@PreAuthorize("@appAuthorizer.authorize(authentication, this)")
+	public ResponseEntity<?> createCampaign(@RequestBody CampaignRequest campaignRequest) {
+		try {
+			Campaigns result = uService.createCampaign(new Campaigns(campaignRequest.getCampaignsName(),
+					campaignRequest.getCampaignImagePath(), campaignRequest.getCampaignDescribed()));
+			return ResponseEntity.ok(new DefaultResponse("1000", "OK", result));
+		} catch (Exception e) {
+			return new ResponseEntity<ExceptionResponse>(new ExceptionResponse("9999", "Exception error"),
+					HttpStatus.BAD_REQUEST);
+		}
+	}
+
+	@RequestMapping({ "/getCampaign" })
+	@PreAuthorize("@appAuthorizer.authorize(authentication, this)")
+	public ResponseEntity<?> getCampaign(@RequestParam(value = "campaignId", required = false) String campaignId) {
+		try {
+			if (campaignId == null) {
+				List<Campaigns> list = uService.getCampaigns();
+				return ResponseEntity.ok(new DefaultResponse("1000", "OK", list));
+			} else {
+				Campaigns campaigns = uService.getCampaign(Long.parseLong(campaignId));
+				return ResponseEntity.ok(new DefaultResponse("1000", "OK", campaigns));
+			}
+		} catch (Exception e) {
+			return new ResponseEntity<ExceptionResponse>(new ExceptionResponse("9999", "Exception error"),
+					HttpStatus.BAD_REQUEST);
+		}
+	}
+
+	@RequestMapping({ "/likeUser" })
+	public ResponseEntity<?> likeUser(@RequestHeader String Authorization, @RequestParam String userId) {
+		try {
+			String username = userDetailsService.getUsernameFromToken(Authorization.substring(7));
+			Users user = userDetailsService.getUserByUsername(username);
+			Reactions like = new Reactions();
+			like.setLike(true);
+			like.setReactionUser(user.getUserId());
+			like.setReactionType(1);
+			like.setUsers(uService.getUserInfo(Long.parseLong(userId)));
+			return ResponseEntity.ok(new DefaultResponse("1000", "OK", uService.likeUser(like)));
+		} catch (Exception e) {
+			return new ResponseEntity<ExceptionResponse>(new ExceptionResponse("9999", "Exception error"),
+					HttpStatus.BAD_REQUEST);
+		}
+	}
+
+	@RequestMapping({ "/likeProduct" })
+	public ResponseEntity<?> likeProduct(@RequestHeader String Authorization, @RequestParam String productId) {
+		try {
+			String username = userDetailsService.getUsernameFromToken(Authorization.substring(7));
+			Users userReaction = userDetailsService.getUserByUsername(username);
+			Reactions like = new Reactions();
+			like.setLike(true);
+			like.setReactionUser(userReaction.getUserId());
+			like.setReactionType(1);
+			like.setProducts(uService.getProductById(Long.parseLong(productId)));
+			return ResponseEntity.ok(new DefaultResponse("1000", "OK", uService.likeUser(like)));
 		} catch (Exception e) {
 			return new ResponseEntity<ExceptionResponse>(new ExceptionResponse("9999", "Exception error"),
 					HttpStatus.BAD_REQUEST);

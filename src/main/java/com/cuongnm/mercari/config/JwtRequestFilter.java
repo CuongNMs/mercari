@@ -9,6 +9,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.springframework.beans.factory.annotation.Autowired;
+
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -17,7 +18,6 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.context.support.SpringBeanAutowiringSupport;
 import org.springframework.web.filter.OncePerRequestFilter;
 
-import com.cuongnm.mercari.model.JwtBlacklist;
 import com.cuongnm.mercari.service.JwtUserDetailsService;
 
 import io.jsonwebtoken.ExpiredJwtException;
@@ -47,14 +47,11 @@ public class JwtRequestFilter extends OncePerRequestFilter {
 
 		if (requestTokenHeader != null && requestTokenHeader.startsWith("Bearer ")) {
 			jwtToken = requestTokenHeader.substring(7);
-			JwtBlacklist blacklist = jwtUserDetailsService.getJwtBlacklistToken(jwtToken);
-			if (blacklist != null) {
-				throw new ServletException("Invalid token.");
-			}
 			try {
 				username = jwtTokenUtil.getUsernameFromToken(jwtToken);
 			} catch (IllegalArgumentException e) {
 				System.out.println("Unable to get JWT Token");
+
 			} catch (ExpiredJwtException e) {
 				System.out.println("JWT Token has expired");
 			}
@@ -62,11 +59,9 @@ public class JwtRequestFilter extends OncePerRequestFilter {
 			logger.warn("JWT Token does not begin with Bearer String");
 		}
 
-		
 		if (username != null && SecurityContextHolder.getContext().getAuthentication() == null) {
 
 			UserDetails userDetails = this.jwtUserDetailsService.loadUserByUsername(username);
-
 
 			if (jwtTokenUtil.validateToken(jwtToken, userDetails)) {
 

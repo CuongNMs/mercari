@@ -22,14 +22,38 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 @Table(name = "reactions")
 public class Reactions {
 
+	public Users getUsers() {
+		return users;
+	}
+
+	public void setUsers(Users users) {
+		this.users = users;
+	}
+
+	public Products getProducts() {
+		return products;
+	}
+
+	public void setProducts(Products products) {
+		this.products = products;
+	}
+
 	@Id
-	@GeneratedValue(strategy = GenerationType.AUTO, generator="native")
-	@GenericGenerator(
-		    name = "native",
-		    strategy = "increment"
-		)
+	@GeneratedValue(strategy = GenerationType.AUTO, generator = "native")
+	@GenericGenerator(name = "native", strategy = "increment")
 	@Column(name = "reaction_id")
 	private Long reactionId;
+
+	@Column(name = "reaction_user")
+	private Long reactionUser;
+
+	public Long getReactionUser() {
+		return reactionUser;
+	}
+
+	public void setReactionUser(Long reactionUser) {
+		this.reactionUser = reactionUser;
+	}
 
 	@Column(name = "reaction_type")
 	private Integer reactionType;
@@ -45,7 +69,7 @@ public class Reactions {
 
 	@Column(name = "rate")
 	private Integer rate;
-	
+
 	@Temporal(TemporalType.TIMESTAMP)
 	@Column(name = "created_date")
 	private Date createdDate;
@@ -60,12 +84,12 @@ public class Reactions {
 
 	@ManyToOne
 	@JoinColumn(name = "user_id") // thông qua khóa ngoại user_id
-	@JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
+	@JsonIgnoreProperties({ "hibernateLazyInitializer", "handler" })
 	private Users users;
-	
+
 	@ManyToOne
 	@JoinColumn(name = "product_id") // thông qua khóa ngoại user_id
-	@JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
+	@JsonIgnoreProperties({ "hibernateLazyInitializer", "handler" })
 	private Products products;
 
 	public Reactions() {
